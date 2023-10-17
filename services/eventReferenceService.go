@@ -5,7 +5,7 @@ import (
 	"log"
 	"reflect"
 	"script-check-time/config"
-	"strings"
+	"strconv"
 )
 
 type EventReference struct {
@@ -64,10 +64,22 @@ func FindEventsByIdsAndGetIdAndPeriod(ids []int) []EventReference {
 		strIDs[i] = id
 	}
 
-	placeholders := strings.Repeat(",?", len(ids)-1)
-	fmt.Println(reflect.TypeOf(placeholders))
+	fmt.Println(strIDs)
 
-	query := fmt.Sprintf(`SELECT id, name, url, period FROM event_reference WHERE id IN (?%s)`, placeholders)
+	var placeholder string
+	//placeholders := strings.Repeat(",?", len(ids)-1)
+	for i, _ := range ids {
+		if i != 0 {
+			a := i + 1
+			num := strconv.Itoa(a)
+			placeholder += "," + "$" + num
+		}
+
+	}
+
+	fmt.Println(reflect.TypeOf(placeholder))
+
+	query := fmt.Sprintf(`SELECT id, period FROM event_reference WHERE id IN ($1%s)`, placeholder)
 	fmt.Println(query)
 
 	rows, err := db.Query(query, strIDs...)

@@ -11,7 +11,8 @@ func main() {
 
 	services.CheckQueueTimeAndMakeNewEvent()
 
-	//services.AddAnEventAndAddQueueWithIdEvent("Dream", "lunch.com", "17:05:00")
+	// Добавление событий и очередей с айдишниками событий
+	//services.AddAnEventAndAddQueueWithIdEvent("Проснуться", "up.com", "11:01:00")
 
 	// Добавление очередей
 	/*services.AddQueue()

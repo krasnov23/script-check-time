@@ -36,14 +36,17 @@ func CheckQueueTimeAndMakeNewEvent() {
 	// Получаем очереди, которые уже прошли (время которых истекло) и возвращаем слайс их id
 	pastQueues := GetExpiredQueues()
 
-	// По полученным event_id находим все event и возвращаем слайс объектов EventReference(ID,Period)
-	eventReferences := FindEventsByIdsAndGetIdAndPeriod(pastQueues)
+	if len(pastQueues) != 0 {
+		// По полученным event_id находим все event и возвращаем слайс объектов EventReference(ID,Period)
+		eventReferences := FindEventsByIdsAndGetIdAndPeriod(pastQueues)
 
-	// Удаляем прошедшие очереди
-	DeleteExpireQueues()
+		// Удаляем прошедшие очереди
+		DeleteExpireQueues()
 
-	// Создаем эти же очереди на завтра
-	for _, event := range eventReferences {
-		AddNewQueueByEventData(event.ID, event.Period)
+		// Создаем эти же очереди на завтра
+		for _, event := range eventReferences {
+			AddNewQueueByEventData(event.ID, event.Period)
+		}
 	}
+
 }

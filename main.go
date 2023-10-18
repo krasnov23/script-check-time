@@ -10,9 +10,14 @@ func main() {
 	config.Connect()
 
 	services.CheckQueueTimeAndMakeNewEvent()
+	/*_, eventObject := services.AddNewEventWithGetIdRecordBack("Проснуться", "son.com",
+	`{"periodInDays": 1,"startDate":"2023-10-18 15:04:05","periodInMonths" : 0}`)*/
+
+	//services.CheckQueueTimeAndMakeNewEvent()
 
 	// Добавление событий и очередей с айдишниками событий
-	//services.AddAnEventAndAddQueueWithIdEvent("Проснуться", "up.com", "11:01:00")
+	/*services.AddAnEventAndAddQueueWithIdEvent("Пообедать", "lunch.com",
+	`{"periodInDays": 1,"startDate":"2023-10-18 16:04:05","periodInMonths": 0}`)*/
 
 	// Добавление очередей
 	/*services.AddQueue()

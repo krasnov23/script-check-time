@@ -1,11 +1,17 @@
 package services
 
 import (
+	"encoding/json"
 	"fmt"
 	"log"
 	"script-check-time/config"
 	"time"
 )
+
+type Queue struct {
+	Date    time.Time
+	EventID int
+}
 
 func AddNewQueue(eventId int, queryCreated time.Time) {
 
@@ -34,19 +40,28 @@ func AddNewQueue(eventId int, queryCreated time.Time) {
 
 }
 
-func AddNewQueueByEventData(id int, period string) {
+// period - нужно распарсить из строки в объект Event
+func AddNewQueueByEventDataAndEditEventDate(id int, period string) {
 
-	now := time.Now()
-	tomorrow := now.AddDate(0, 0, 1)
-	year, month, day := tomorrow.Date()
+	var e Event
+	err := json.Unmarshal([]byte(period), &e)
+
+	if err != nil {
+		log.Fatal(err)
+	}
+	fmt.Println(e)
+
+	//now := time.Now()
+	//tomorrow := now.AddDate(0, 0, e.periodInDays)
+	//year, month, day := tomorrow.Date()
 
 	layout := "2006-01-02 15:04:05"
 
 	// Concatenate current date and incoming time for parsing
-	dateTimeStr := fmt.Sprintf("%d-%02d-%02d %s", year, month, day, period)
+	//dateTimeStr := fmt.Sprintf("%d-%02d-%02d %s", year, month, day, period)
 
 	// Parsing the string to time
-	myTime, err := time.Parse(layout, dateTimeStr)
+	myTime, err := time.Parse(layout, e.StartDate)
 
 	// Handle error
 	if err != nil {
@@ -55,7 +70,16 @@ func AddNewQueueByEventData(id int, period string) {
 		fmt.Println("Parsed time in current date: ", myTime)
 	}
 
-	AddNewQueue(id, myTime)
+	// Новая дата
+	newDate := myTime.AddDate(0, e.PeriodInMonths, e.PeriodInDays)
+	fmt.Println(newDate)
+
+	e.StartDate = newDate.Format(layout)
+	fmt.Println(e.StartDate)
+
+	EditEventsById(id, e)
+
+	AddNewQueue(id, newDate)
 }
 
 func GetAllQueuesByDate(timeStamp time.Time) ([]string, error) {
@@ -107,22 +131,21 @@ func GetExpiredQueues() []int {
 
 	defer rows.Close()
 
-	var queries []int
+	var queues []int
 	for rows.Next() {
-		var query int
-		if err := rows.Scan(&query); err != nil {
+		var queue int
+		if err := rows.Scan(&queue); err != nil {
 			log.Fatal(err)
 		}
-		queries = append(queries, query)
+		queues = append(queues, queue)
 	}
 
 	if err := rows.Err(); err != nil {
 		log.Fatal(err)
 	}
 
-	fmt.Println(queries)
-	return queries
-
+	fmt.Println(queues)
+	return queues
 }
 
 func DeleteExpireQueues() {

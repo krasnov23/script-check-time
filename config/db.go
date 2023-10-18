@@ -25,8 +25,9 @@ func Connect() {
 
 	DB = db
 	CreateQueueTable()
+	//DeleteEventTable()
 	CreateEventTable()
-
+	//DeleteQueueTable()
 }
 
 func CreateQueueTable() {
@@ -44,13 +45,40 @@ func CreateQueueTable() {
 }
 
 func CreateEventTable() {
+
 	db := GetDB()
+
 	query := "CREATE TABLE IF NOT EXISTS event_reference (id SERIAL PRIMARY KEY,name VARCHAR(255),url VARCHAR(255),period VARCHAR(255))"
 	_, err := db.Exec(query)
 	if err != nil {
 		log.Fatal(err)
 	} else {
 		fmt.Println("Table Event created successfully!")
+	}
+}
+
+func DeleteEventTable() {
+
+	db := GetDB()
+
+	delete := "DROP TABLE IF EXISTS event_reference"
+	_, err := db.Exec(delete)
+	if err != nil {
+		log.Fatal(err)
+	} else {
+		fmt.Println("Table Event deleted successfully!")
+	}
+}
+
+func DeleteQueueTable() {
+	db := GetDB()
+
+	delete := "DROP TABLE IF EXISTS queues"
+	_, err := db.Exec(delete)
+	if err != nil {
+		log.Fatal(err)
+	} else {
+		fmt.Println("Table Queue deleted successfully!")
 	}
 }
 

@@ -1,6 +1,7 @@
 package services
 
 import (
+	"encoding/json"
 	"fmt"
 	"log"
 	"reflect"
@@ -11,6 +12,12 @@ import (
 type EventReference struct {
 	ID     int
 	Period string
+}
+
+type Event struct {
+	PeriodInDays   int    `json:"periodInDays"`
+	PeriodInMonths int    `json:"periodInMonths"`
+	StartDate      string `json:"startDate"`
 }
 
 func AddNewEvent(name string, url string, period string) {
@@ -32,7 +39,7 @@ func AddNewEvent(name string, url string, period string) {
 
 }
 
-func AddNewEventWithGetIdRecordBack(name string, url string, insertedPeriod string) (int, string) {
+func AddNewEventWithGetIdRecordBack(name string, url string, insertedPeriod string) (int, Event) {
 
 	db := config.DB
 
@@ -49,10 +56,20 @@ func AddNewEventWithGetIdRecordBack(name string, url string, insertedPeriod stri
 	// Execute the query. Scan for the returned 'id'
 	err = stmt.QueryRow(name, url, insertedPeriod).Scan(&id, &period)
 	if err != nil {
-		log.Fatal(err)
+		log.Printf("Error with scanning and returning id,period: %s", err)
 	}
 
-	return id, period
+	fmt.Println(period)
+
+	var e Event
+	err = json.Unmarshal([]byte(period), &e)
+
+	if err != nil {
+		log.Printf("Problem with unmarshall: %s", err)
+	}
+
+	return id, e
+
 }
 
 func FindEventsByIdsAndGetIdAndPeriod(ids []int) []EventReference {
@@ -103,7 +120,27 @@ func FindEventsByIdsAndGetIdAndPeriod(ids []int) []EventReference {
 		log.Fatal(err)
 	}
 
+	fmt.Println(records)
 	return records
+
+}
+
+func EditEventsById(id int, event Event) {
+
+	db := config.DB
+
+	jsonData, err := json.Marshal(&event)
+	if err != nil {
+		log.Println(err)
+		return
+	}
+
+	_, err = db.Exec(`UPDATE event_reference SET period = $1 WHERE id = $2`, jsonData, id)
+	if err != nil {
+		panic(err)
+	}
+
+	fmt.Println("Record updated successfully!")
 
 }
 

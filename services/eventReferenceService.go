@@ -15,9 +15,13 @@ type EventReference struct {
 }
 
 type Event struct {
-	PeriodInDays   int    `json:"periodInDays"`
-	PeriodInMonths int    `json:"periodInMonths"`
-	StartDate      string `json:"startDate"`
+	PeriodInDays   int                 `json:"periodInDays"`
+	PeriodInMonths int                 `json:"periodInMonths"`
+	DaysOfWeek     map[string][]string `json:"daysOfWeek"`
+	CertainDate    []string            `json:"certainDate"`
+	Odd            string              `json:"odd"`
+	Even           string              `json:"even"`
+	LastDayOfMonth string              `json:"lastDayOfMonth"`
 }
 
 func AddNewEvent(name string, url string, period string) {
@@ -107,6 +111,7 @@ func FindEventsByIdsAndGetIdAndPeriod(ids []int) []EventReference {
 	defer rows.Close()
 
 	var records []EventReference
+
 	for rows.Next() {
 		var r EventReference
 		err = rows.Scan(&r.ID, &r.Period) // added missing fields

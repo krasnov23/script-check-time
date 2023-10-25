@@ -24,10 +24,7 @@ func Connect() {
 	fmt.Println("Successfully connected!")
 
 	DB = db
-	CreateQueueTable()
-	//DeleteEventTable()
-	CreateEventTable()
-	//DeleteQueueTable()
+
 }
 
 func CreateQueueTable() {

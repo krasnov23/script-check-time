@@ -10,6 +10,7 @@ import (
 var DB *sql.DB
 
 func Connect() {
+
 	connStr := "postgres://postgres:postgres@localhost:5435/postgres?sslmode=disable"
 	db, err := sql.Open("postgres", connStr)
 	if err != nil {
@@ -25,6 +26,8 @@ func Connect() {
 
 	DB = db
 
+	CreateEventTable()
+	CreateQueueTable()
 }
 
 func CreateQueueTable() {

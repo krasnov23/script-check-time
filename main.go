@@ -8,9 +8,20 @@ func main() {
 
 	config.Connect()
 
+	/*services.AddAnEventAndAddQueueWithIdEvent("Сходить в зал", "gym.com",
+	`{ "odd" : "15:05:00" }`)*/
+
+	//services.CheckQueueTimeAndMakeNewEvent()
+
+	//config.DeleteEventTable()
+	//config.DeleteQueueTable()
+
 }
 
 // Тестовые данные для проверки
+
+/*services.AddAnEventAndAddQueueWithIdEvent("Пробник", "test.com",
+`{"periodInMonths": 1,"CertainDate" : ["25 15:35:00","25 15:40:00","25 15:43:00"]}`)*/
 
 /*services.AddAnEventAndAddQueueWithIdEvent("Заплатит зарплату", "salary.com",
 `{ "lastDayOfMonth" : "20:00:00" }`)*/

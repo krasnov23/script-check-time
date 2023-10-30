@@ -49,7 +49,7 @@ func AddAnEventAndAddQueueWithIdEvent(name string, url string, insertedPeriod st
 			AddNewQueue(id, t)
 		} else {
 
-			t := time.Date(time.Now().Year(), month, day, hours, minutes, seconds, 0, time.UTC).AddDate(0, 1, 0)
+			t := time.Date(time.Now().Year(), month+1, day, hours, minutes, seconds, 0, time.UTC) //.AddDate(0, 1, 0)
 
 			AddNewQueue(id, t)
 		}
@@ -141,23 +141,6 @@ func AddAnEventAndAddQueueWithIdEvent(name string, url string, insertedPeriod st
 	}
 
 }
-
-//now := time.Now()
-//year, month, day := now.Date()
-
-//layout := "2006-01-02 15:04:05"
-
-// Concatenate current date and incoming time for parsing
-//dateTimeStr := fmt.Sprintf("%d-%02d-%02d %s", period)
-
-//myTime, err := time.Parse(layout, period.DaysOfWeek)
-
-// Handle error
-/*if err != nil {
-	fmt.Println("Parsing error", err.Error())
-} else {
-	fmt.Println("Parsed time in current date: ", myTime)
-}*/
 
 func CheckQueueTimeAndMakeNewEvent() {
 

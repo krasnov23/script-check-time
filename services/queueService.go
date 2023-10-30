@@ -101,11 +101,28 @@ func AddNewQueueByEventIdAndJsonEventData(eventsReferences []EventReference) {
 				DeleteQueueById(id)
 			}
 
+			if t.Day() >= 20 {
+				firstDayOfAfterNextMonth := time.Date(t.Year(), t.Month()+2, 1, hours, minutes, seconds, 0, time.UTC)
+
+				lastDayOfNextMonth := firstDayOfAfterNextMonth.AddDate(0, 0, -1)
+
+				isExists := findQueueIdByDateAndEventId(id, lastDayOfNextMonth)
+
+				if isExists == 0 {
+					AddNewQueue(id, lastDayOfNextMonth)
+				}
+
+			}
+
 			firstDayOfNextMonth := time.Date(t.Year(), t.Month()+1, 1, hours, minutes, seconds, 0, time.UTC)
 
 			lastDayOfCurrentMonth := firstDayOfNextMonth.AddDate(0, 0, -1)
 
-			AddNewQueue(id, lastDayOfCurrentMonth)
+			isExists := findQueueIdByDateAndEventId(id, lastDayOfCurrentMonth)
+
+			if isExists == 0 {
+				AddNewQueue(id, lastDayOfCurrentMonth)
+			}
 		}
 
 		if len(event.CertainDate) > 0 {
@@ -114,9 +131,47 @@ func AddNewQueueByEventIdAndJsonEventData(eventsReferences []EventReference) {
 			newCertainDates := make([]time.Time, len(event.CertainDate))
 
 			// Получаем слайс последних истекших дат
-			expiredDates := GetExpiredQueueByEventId(id, len(event.CertainDate))
+			expiredDates := GetExpiredQueueByEventId(id)
+
+			// Реализуем логику с февралем
+			//eventStartDates := event.CertainDate
 
 			for _, date := range expiredDates {
+
+				isFebruary := (int(date.Month()) + event.PeriodInMonths) % 12
+
+				term := (date.Day() == 29 || date.Day() == 30 || date.Day() == 31) && event.PeriodInMonths > 0 && isFebruary == 2
+
+				if term {
+					now := time.Now()
+
+					var newDate time.Time
+
+					str := "2024-02-25"
+
+					example, err := time.Parse("2006-01-02", str)
+
+					if err != nil {
+						fmt.Println(err)
+					}
+
+					year := int(date.Month()) + event.PeriodInMonths
+					if year > 12 {
+						year = now.Year() + 1
+					} else {
+						year = now.Year()
+					}
+
+					if year%4 == 0 {
+						newDate = time.Date(year, example.Month(), 29, date.Hour(),
+							date.Minute(), date.Second(), 0, time.UTC)
+					} else {
+						newDate = time.Date(year, example.Month(), 28, date.Hour(),
+							date.Minute(), date.Second(), 0, time.UTC)
+					}
+
+					newCertainDates = append(newCertainDates, newDate)
+				}
 
 				// Добавляем дни и месяцы к дате исходя из нашего ивента
 				newDate := date.AddDate(0, event.PeriodInMonths, event.PeriodInDays)
@@ -149,7 +204,7 @@ func AddNewQueueByEventIdAndJsonEventData(eventsReferences []EventReference) {
 			// newCertainDates := make([]time.Time, len(event.DaysOfWeek))
 
 			// Получаем слайс последних истекших дат
-			expiredDates := GetExpiredQueueByEventId(id, len(event.DaysOfWeek))
+			expiredDates := GetExpiredQueueByEventId(id)
 
 			// Получаем дни недели по числам из истекших дат
 			for _, weekDay := range expiredDates {
@@ -254,7 +309,7 @@ func executeLogicToAddNewQueueByOddOrEven(oddOrEven string, todayDay int, eventI
 
 		// Создаем очереди, которые еще не были созданы
 		for n := range checkNewQueuesDates {
-			AddNewQueue(todayDay, checkNewQueuesDates[n])
+			AddNewQueue(eventId, checkNewQueuesDates[n])
 		}
 
 	} else {
@@ -443,7 +498,7 @@ func GetAllQueuesByDate(timeStamp time.Time) ([]string, error) {
 	return queries, nil
 }
 
-func GetExpiredQueueByEventId(id int, amountOfCertainDates int) []time.Time {
+func GetExpiredQueueByEventId(id int) []time.Time {
 
 	db := config.GetDB()
 
@@ -456,8 +511,7 @@ func GetExpiredQueueByEventId(id int, amountOfCertainDates int) []time.Time {
 		FROM queues
 		WHERE event_id = $1 AND date < $2
 		ORDER BY date DESC
-		LIMIT $3
-	`, id, time.Now(), amountOfCertainDates)
+	`, id, time.Now())
 
 	if err != nil {
 		panic(err)
@@ -498,7 +552,7 @@ func findQueueIdByDateAndEventId(id int, date time.Time) int {
 
 	if err != nil {
 		log.Printf("Error while executing the query: %v", err)
-		return -1
+		return 0
 	}
 
 	defer row.Close()
